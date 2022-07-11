@@ -9,7 +9,11 @@ import SwiftUI
 
 struct AddView: View {
     
+    @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var listViewModel: ListViewModel
     @State var textFieldText: String = ""
+    @State var alertTitle: String = ""
+    @State var showAlert: Bool = false
     
     var body: some View {
         ScrollView {
@@ -21,15 +25,13 @@ struct AddView: View {
                     .shadow(radius: 12)
                 .cornerRadius(11)
                 
-                Button(action: {
-                    
-                }, label: {
+                Button(action: saveButtonPressed, label: {
                     Text("Save".uppercased())
                         .foregroundColor(.white)
                         .font(.headline)
                         .frame(width: .infinity, height: 55, alignment: .center)
                         .frame(maxWidth: .infinity)
-                        .background(Color.accentColor)
+                        .background(Color.brown)
                         .cornerRadius(10)
                         .shadow(radius: 12)
                 })
@@ -38,6 +40,28 @@ struct AddView: View {
             .padding(15)
         }
         .navigationTitle("Add an Item ✍🏽")
+        .alert(isPresented: $showAlert, content: getAlert)
+    }
+    
+    func saveButtonPressed(){
+        if textIsAppropriate() {
+            listViewModel.addItem(title: textFieldText)
+            presentationMode.wrappedValue.dismiss()
+        }
+        
+    }
+    
+    func textIsAppropriate() -> Bool {
+        if textFieldText.count < 3 {
+            alertTitle = "Your new item most be at least 3 characters or more 🙈"
+            showAlert.toggle()
+            return false
+        }
+        return true
+    }
+    
+    func getAlert() -> Alert {
+        return Alert(title: Text(alertTitle))
     }
 }
 
@@ -46,6 +70,6 @@ struct AddView_Previews: PreviewProvider {
         NavigationView{
             AddView()
         }
-        
+        .environmentObject(ListViewModel())
     }
 }
